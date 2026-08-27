@@ -729,7 +729,10 @@ BaseView* TextView::GetTopViewToAcceptEvent(const FloatPoint& position,
   *relative_position = point_by_paragraph;
   BaseView* view = nullptr;
   view = GetViewAtPosition(point_by_paragraph, position, platform_try_hit_id);
-  return view ?: this;
+  BaseView* target = view ?: this;
+  // TextView overrides BaseView's target lookup, so apply the inherited
+  // event-through check before returning a text or inline-view hover target.
+  return target->ShouldPassEventToNativeInherited() ? nullptr : target;
 }
 
 BaseView* TextView::GetViewAtPosition(const FloatPoint& point_by_paragraph,
