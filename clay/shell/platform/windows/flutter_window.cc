@@ -185,7 +185,7 @@ static HCURSOR GetCursorByType(clay::CursorTypes cursor_type) {
 
 FlutterWindow::FlutterWindow(HWND parent_hwnd, int x, int y, int width,
                              int height)
-    : parent_hwnd_(parent_hwnd), binding_handler_delegate_(nullptr) {
+    : binding_handler_delegate_(nullptr) {
   Window::InitializeChild("FLUTTERVIEW", parent_hwnd, x, y, width, height);
   auto cursor = ::LoadCursor(nullptr, IDC_ARROW);
   SetClassLongPtr(GetWindowHandle(), GCLP_HCURSOR,
@@ -273,7 +273,6 @@ void FlutterWindow::OnPaint() {
 void FlutterWindow::OnPointerMove(double x, double y,
                                   ClayPointerDeviceKind device_kind,
                                   int32_t device_id, int modifiers_state) {
-  ConvertPointToParentWindow(&x, &y);
   binding_handler_delegate_->OnPointerMove(x, y, device_kind, device_id,
                                            modifiers_state);
 }
@@ -281,7 +280,6 @@ void FlutterWindow::OnPointerMove(double x, double y,
 void FlutterWindow::OnPointerDown(double x, double y,
                                   ClayPointerDeviceKind device_kind,
                                   int32_t device_id, UINT button) {
-  ConvertPointToParentWindow(&x, &y);
   uint64_t flutter_button = ConvertWinButtonToFlutterButton(button);
   if (flutter_button != 0) {
     binding_handler_delegate_->OnPointerDown(
@@ -293,7 +291,6 @@ void FlutterWindow::OnPointerDown(double x, double y,
 void FlutterWindow::OnPointerUp(double x, double y,
                                 ClayPointerDeviceKind device_kind,
                                 int32_t device_id, UINT button) {
-  ConvertPointToParentWindow(&x, &y);
   uint64_t flutter_button = ConvertWinButtonToFlutterButton(button);
   if (flutter_button != 0) {
     binding_handler_delegate_->OnPointerUp(
@@ -305,7 +302,6 @@ void FlutterWindow::OnPointerUp(double x, double y,
 void FlutterWindow::OnPointerLeave(double x, double y,
                                    ClayPointerDeviceKind device_kind,
                                    int32_t device_id) {
-  ConvertPointToParentWindow(&x, &y);
   binding_handler_delegate_->OnPointerLeave(x, y, device_kind, device_id);
 }
 
@@ -348,8 +344,7 @@ void FlutterWindow::OnScroll(double delta_x, double delta_y,
   POINT point;
   GetCursorPos(&point);
 
-  ScreenToClient(parent_hwnd_ ? parent_hwnd_ : Window::GetWindowHandle(),
-                 &point);
+  ScreenToClient(GetWindowHandle(), &point);
   binding_handler_delegate_->OnScroll(point.x, point.y, delta_x, delta_y,
                                       GetScrollOffsetMultiplier(), device_kind,
                                       device_id);
@@ -389,19 +384,8 @@ bool FlutterWindow::OnBitmapSurfaceUpdated(const void* allocation,
 PointerLocation FlutterWindow::GetPrimaryPointerLocation() {
   POINT point;
   GetCursorPos(&point);
-  ScreenToClient(parent_hwnd_ ? parent_hwnd_ : Window::GetWindowHandle(),
-                 &point);
+  ScreenToClient(GetWindowHandle(), &point);
   return {(size_t)point.x, (size_t)point.y};
-}
-
-void FlutterWindow::ConvertPointToParentWindow(double* x, double* y) {
-  if (!parent_hwnd_) {
-    return;
-  }
-  POINT point = {static_cast<LONG>(*x), static_cast<LONG>(*y)};
-  MapWindowPoints(Window::GetWindowHandle(), parent_hwnd_, &point, 1);
-  *x = point.x;
-  *y = point.y;
 }
 
 void FlutterWindow::OnThemeChange() {

@@ -27,7 +27,6 @@
 #include "clay/shell/common/switches.h"
 #include "clay/shell/platform/common/path_utils.h"
 #include "clay/shell/platform/windows/flutter_windows_view.h"
-#include "clay/shell/platform/windows/overlay_platform_plugin_win.h"
 #include "clay/shell/platform/windows/overlay_view_manager_service.h"
 #include "clay/shell/platform/windows/overlay_windows_view.h"
 #include "clay/shell/platform/windows/task_runner.h"
@@ -255,21 +254,6 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
     FML_LOG(ERROR) << "Failed to start Flutter engine";
     return false;
   }
-
-  service_manager_ = engine_->GetServiceManager();
-  if (!service_manager_) {
-    FML_LOG(ERROR) << "Failed to get clay service manager";
-    return false;
-  }
-  // CoverView resolves OverlayService while the UI tree is being created, so
-  // register the Windows implementation before launching the shell.
-  overlay_view_manager_service_ =
-      std::make_shared<OverlayViewManagerService>(this);
-  service_manager_->RegisterService<OverlayViewManagerService>(
-      overlay_view_manager_service_);
-  overlay_platform_service_ = std::make_shared<OverlayPlatformServiceWin>();
-  service_manager_->RegisterService<OverlayService>(overlay_platform_service_);
-
   // Step 1: Launch the shell.
   if (!engine_->LaunchShell()) {
     FML_LOG(ERROR) << "Could not launch the engine using supplied "
@@ -282,6 +266,17 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
     FML_LOG(ERROR) << "Could not create platform view components.";
     return false;
   }
+  service_manager_ = engine_->GetServiceManager();
+  if (!service_manager_) {
+    FML_LOG(ERROR) << "Failed to get clay service manager";
+    return false;
+  }
+
+  overlay_view_manager_service_ =
+      std::make_shared<OverlayViewManagerService>(this);
+  // |view_| can be nullptr in headless mode; avoid dereferencing it here.
+  service_manager_->RegisterService<OverlayViewManagerService>(
+      overlay_view_manager_service_);
 
   // Configure device frame rate displayed via devtools.
   std::vector<std::unique_ptr<clay::Display>> displays;

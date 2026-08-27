@@ -40,7 +40,6 @@ namespace clay {
 
 class FlutterWindowsView;
 class OverlayViewManagerService;
-class OverlayService;
 
 // A unique identifier for a view.
 using FlutterViewId = int64_t;
@@ -362,7 +361,6 @@ class FlutterWindowsEngine : public PlatformViewEmbedderDelegate,
   std::shared_ptr<clay::ServiceManager> service_manager_;
 
   std::shared_ptr<OverlayViewManagerService> overlay_view_manager_service_;
-  std::shared_ptr<OverlayService> overlay_platform_service_;
 };
 
 }  // namespace clay

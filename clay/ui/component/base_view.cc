@@ -74,6 +74,18 @@ LYNX_UI_METHOD_END(BaseView);
 
 constexpr int64_t FORCE_CACHE_ANIMATION_DURATION = 500;
 
+bool ShouldPassEventToNativeInherited(BaseView* view) {
+  if (view == nullptr) {
+    return false;
+  } else if (view->CanEventThrough().has_value()) {
+    return *view->CanEventThrough();
+  } else if (view->Parent() == nullptr) {
+    return false;
+  } else {
+    return ShouldPassEventToNativeInherited(view->Parent());
+  }
+}
+
 #ifdef ENABLE_ACCESSIBILITY
 BaseView* A11yScrollTargetForSemantics(BaseView* view) {
   if (!view) {
@@ -2797,7 +2809,7 @@ bool BaseView::HitTest(const PointerEvent& event, HitTestResult& result) {
   if (beyond_self) {
     return founded;
   }
-  should_pass_event_for_hittest_ = ShouldPassEventToNativeInherited();
+  should_pass_event_for_hittest_ = ShouldPassEventToNativeInherited(this);
   result.emplace_back(GetHitTestTargetWeakPtr());
   return true;
 }
@@ -3014,20 +3026,9 @@ BaseView* BaseView::GetTopViewToAcceptEvent(const FloatPoint& position,
       return nullptr;
     }
     *relative_position = point_by_self;
-    return ShouldPassEventToNativeInherited() ? nullptr : this;
+    return ShouldPassEventToNativeInherited(this) ? nullptr : this;
   }
   return nullptr;
-}
-
-bool BaseView::ShouldPassEventToNativeInherited() const {
-  const BaseView* view = this;
-  while (view != nullptr) {
-    if (view->CanEventThrough().has_value()) {
-      return *view->CanEventThrough();
-    }
-    view = view->Parent();
-  }
-  return false;
 }
 
 FloatPoint BaseView::GetPointBySelf(const FloatPoint& point_by_page) const {
@@ -3189,12 +3190,8 @@ bool BaseView::HandleCommonAttribute(const char* attr,
       data_set_ = CloneClayValue(value);
       break;
     case KeywordID::kEventThrough:
-      if (utils::IsNullOrInvalid(value)) {
-        event_through_.reset();
-      } else {
-        event_through_ = utils::GetBool(value);
-      }
-      if (event_through_.value_or(false)) {
+      event_through_ = utils::GetBool(value);
+      if (event_through_) {
         auto task_runners = page_view_->GetTaskRunners();
         if (task_runners.GetPlatformTaskRunner() !=
             task_runners.GetUITaskRunner()) {

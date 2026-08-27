@@ -71,8 +71,7 @@ void PerfControllerProxyImpl::RunTaskInReportThread(base::closure task) {
   });
 }
 
-void PerfControllerProxyImpl::OnEvent(int32_t instance_id,
-                                      PerfReportEvent& event) {
+void PerfControllerProxyImpl::OnEvent(int32_t instance_id, ReportEvent& event) {
   perf_actor_->ActAsync(
       [instance_id, event = std::move(event)](auto& controller) mutable {
         lynx::tasm::report::MoveOnlyEvent move_only_event;
