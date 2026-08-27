@@ -21,6 +21,9 @@ void ExternalViewLayer::Preroll(PrerollContext* context) {
                        "does not support embedding";
     return;
   }
+#ifdef ENABLE_SKITY
+  context->paints_into_platform_view_slice = true;
+#endif
   ContainerLayer::Preroll(context);
   context->has_platform_view = true;
   context->paints_into_platform_view_slice = true;

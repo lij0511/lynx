@@ -42,13 +42,6 @@ GPUSurfaceGLSkity::GPUSurfaceGLSkity(
     : delegate_(delegate),
       gpu_context_(std::move(skity_context)),
       weak_factory_(this) {
-  auto context_switch = delegate_->GLContextMakeCurrent();
-  if (!context_switch->GetResult()) {
-    FML_LOG(ERROR)
-        << "Could not make the context current to set up the GPU context.";
-    return;
-  }
-
   valid_ = gpu_context_ != nullptr;
   if (valid_) {
     gpu_context_->SetEnableSimpleShapePipeline(true);
