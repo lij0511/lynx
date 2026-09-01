@@ -32,10 +32,10 @@ CoverViewPlatformDelegate::CoverViewPlatformDelegate(int id,
       });
 }
 
-void CoverViewPlatformDelegate::SetEventThrough(bool event_through) {
+void CoverViewPlatformDelegate::SetHitTestTransparent(bool transparent) {
   if (overlay_plugin_) {
-    overlay_plugin_.Act([event_through](auto& plugin) {
-      plugin.SetEventThrough(event_through);
+    overlay_plugin_.Act([transparent](auto& plugin) {
+      plugin.SetHitTestTransparent(transparent);
     });
   }
 }

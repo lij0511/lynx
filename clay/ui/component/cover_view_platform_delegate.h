@@ -21,7 +21,7 @@ class CoverViewPlatformDelegate final
   CoverViewPlatformDelegate(int id, PageView* page_view);
   ~CoverViewPlatformDelegate() override = default;
 
-  void SetEventThrough(bool event_through);
+  void SetHitTestTransparent(bool transparent);
   void SetPreferredSize(int width, int height);
   void OnAttachToTree();
   void OnDetachFromTree();

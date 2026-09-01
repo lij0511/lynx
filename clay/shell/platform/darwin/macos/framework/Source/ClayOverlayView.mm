@@ -27,13 +27,15 @@ NSDragOperation DragOperationForSender(id<NSDraggingInfo> sender) {
 }  // namespace
 
 @implementation ClayOverlayView {
-  NSArray<NSValue*>* _opaqueRects;
+  NSDictionary<NSNumber*, NSValue*>* _opaqueRects;
+  NSMutableSet<NSNumber*>* _hitTestTransparentViewIds;
 }
 
 - (instancetype)initWithFrame:(NSRect)frameRect {
   self = [super initWithFrame:frameRect];
   if (self) {
-    _opaqueRects = @[];
+    _opaqueRects = @{};
+    _hitTestTransparentViewIds = [NSMutableSet set];
     // Host overlay content in a transparent layer.
     self.wantsLayer = YES;
     self.layer.opaque = NO;
@@ -61,9 +63,31 @@ NSDragOperation DragOperationForSender(id<NSDraggingInfo> sender) {
   return YES;
 }
 
-- (void)updateOpaqueRects:(NSArray<NSValue*>*)rects {
-  _opaqueRects = [rects copy] ?: @[];
+- (void)updateOpaqueRects:(NSDictionary<NSNumber*, NSValue*>*)rects {
+  _opaqueRects = [rects copy] ?: @{};
   [self.window invalidateCursorRectsForView:self];
+}
+
+- (void)setHitTestTransparent:(BOOL)transparent forViewId:(int64_t)viewId {
+  NSNumber* key = @(viewId);
+  if (transparent) {
+    [_hitTestTransparentViewIds addObject:key];
+  } else {
+    [_hitTestTransparentViewIds removeObject:key];
+  }
+  [self.window invalidateCursorRectsForView:self];
+}
+
+- (void)removeOpaqueRectForViewId:(int64_t)viewId {
+  NSMutableDictionary<NSNumber*, NSValue*>* rects = [_opaqueRects mutableCopy];
+  [rects removeObjectForKey:@(viewId)];
+  _opaqueRects = [rects copy];
+  [self.window invalidateCursorRectsForView:self];
+}
+
+- (void)removeHitTestStateForViewId:(int64_t)viewId {
+  [self removeOpaqueRectForViewId:viewId];
+  [_hitTestTransparentViewIds removeObject:@(viewId)];
 }
 
 - (NSRect)viewRectFromDevicePixelRect:(NSRect)rect contentsScale:(CGFloat)scale {
@@ -90,8 +114,9 @@ NSDragOperation DragOperationForSender(id<NSDraggingInfo> sender) {
 
 - (NSView*)hitTest:(NSPoint)point {
   // Pass through events outside painted overlay regions.
-  for (NSValue* val in _opaqueRects) {
-    if (NSPointInRect(point, [val rectValue])) {
+  for (NSNumber* view_id in _opaqueRects) {
+    if (![_hitTestTransparentViewIds containsObject:view_id] &&
+        NSPointInRect(point, [_opaqueRects[view_id] rectValue])) {
       return self;
     }
   }

@@ -35,7 +35,7 @@ class OverlayPlatformPlugin : public ActorObject<Owner::kPlatform> {
   virtual void SetStatusBarTranslucent(bool is_translucent) = 0;
   virtual void SetStatusBarTranslucentStyle(std::string style) = 0;
   virtual void SetAndroidFullScreen(bool is_full_screen) = 0;
-  virtual void SetEventThrough(bool event_through) {}
+  virtual void SetHitTestTransparent(bool transparent) {}
   virtual void SetPreferredSize(int width, int height) {}
 
   virtual bool ShouldHandleTreeLifecycle() const { return false; }

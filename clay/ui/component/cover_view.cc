@@ -26,7 +26,8 @@ CoverView::~CoverView() = default;
 void CoverView::SetAttribute(const char* attr, const clay::Value& value) {
   BaseView::SetAttribute(attr, value);
   if (GetKeywordID(attr) == KeywordID::kEventThrough && platform_delegate_) {
-    platform_delegate_->SetEventThrough(CanEventThrough().value_or(false));
+    platform_delegate_->SetHitTestTransparent(
+        CanEventThrough().value_or(false));
   }
 }
 

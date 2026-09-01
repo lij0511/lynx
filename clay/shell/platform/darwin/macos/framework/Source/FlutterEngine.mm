@@ -18,6 +18,7 @@
 #import "clay/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
 #import "clay/shell/platform/darwin/macos/framework/Source/FlutterViewEngineProvider.h"
 #include "clay/shell/platform/darwin/macos/framework/Source/overlay_view_controller_service.h"
+#include "clay/shell/platform/darwin/macos/framework/Source/overlay_platform_plugin_mac.h"
 #include "clay/shell/platform/darwin/macos/framework/Source/platform_overlay_service_mac.h"
 #include "clay/shell/platform/darwin/macos/framework/Source/presenter_service_mac.h"
 
@@ -375,6 +376,11 @@ class ClayPlatformViewMacDelegate : public clay::PlatformViewEmbedderDelegate {
   }
   _service_manager->RegisterService<clay::GestureMediateService>(
       std::make_shared<clay::GestureMediateService>());
+  _service_manager->RegisterService<clay::OverlayViewControllerService>(
+      std::make_shared<clay::OverlayViewControllerService>(
+          self, _clayViewProvider.overlayView));
+  _service_manager->RegisterService<clay::OverlayService>(
+      std::make_shared<clay::OverlayPlatformServiceMac>());
 
   // The engine must not already be running. Initialize may only be called
   // once on an engine instance.
@@ -397,8 +403,6 @@ class ClayPlatformViewMacDelegate : public clay::PlatformViewEmbedderDelegate {
   _service_manager->RegisterService<clay::ClayServiceManagerServiceDarwin>(
       std::make_shared<clay::ClayServiceManagerServiceDarwin>(
           [_clayViewProvider GetClayServiceManager]));
-  _service_manager->RegisterService<clay::OverlayViewControllerService>(
-      std::make_shared<clay::OverlayViewControllerService>(self, _clayViewProvider.overlayView));
   _service_manager->RegisterService<clay::PlatformOverlayService>(
       clay::PlatformOverlayServiceMac::Create());
   _service_manager->RegisterService<clay::PresenterService>(clay::PresenterServiceMac::Create());

@@ -28,10 +28,10 @@ void OverlayPlatformPluginWin::ChangeVisibility(bool visible) {
   }
 }
 
-void OverlayPlatformPluginWin::SetEventThrough(bool event_through) {
-  event_through_ = event_through;
+void OverlayPlatformPluginWin::SetHitTestTransparent(bool transparent) {
+  hit_test_transparent_ = transparent;
   if (view_) {
-    view_->SetHitTestTransparent(event_through);
+    view_->SetHitTestTransparent(transparent);
   }
 }
 
@@ -80,7 +80,7 @@ void OverlayPlatformPluginWin::EnsureView() {
                                  engine_->view()->GetWindowHandle());
   }
   if (view_) {
-    view_->SetHitTestTransparent(event_through_);
+    view_->SetHitTestTransparent(hit_test_transparent_);
   }
 }
 

@@ -24,9 +24,10 @@ void PresenterServiceMac::OnBeforePresent() {
 }
 
 void PresenterServiceMac::OnAfterPresent() {
-  NSMutableArray<NSValue*>* rects = [NSMutableArray arrayWithCapacity:overlay_hit_rects_.size()];
-  for (const CGRect& rect : overlay_hit_rects_) {
-    [rects addObject:[NSValue valueWithRect:rect]];
+  NSMutableDictionary<NSNumber*, NSValue*>* rects =
+      [NSMutableDictionary dictionaryWithCapacity:overlay_hit_rects_.size()];
+  for (const auto& [view_id, rect] : overlay_hit_rects_) {
+    rects[@(view_id)] = [NSValue valueWithRect:rect];
   }
   [overlay_view_controller_service_->GetOverlayView() updateOpaqueRects:rects];
   [CATransaction commit];
@@ -41,7 +42,7 @@ void PresenterServiceMac::UpdateOverlay(const OverlayData& overlay_data) {
   CGRect hit_rect = mac_overlay->DisplayOverlaySurface(
       static_cast<int>(std::floor(rect.X())), static_cast<int>(std::floor(rect.Y())),
       static_cast<int>(std::ceil(rect.Width())), static_cast<int>(std::ceil(rect.Height())));
-  overlay_hit_rects_.push_back(hit_rect);
+  overlay_hit_rects_.emplace_back(overlay_data.view_id, hit_rect);
 }
 
 void PresenterServiceMac::BringOverlayToFront(const PlatformOverlay& overlay) {

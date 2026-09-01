@@ -67,6 +67,8 @@ source_set("flutter_framework_source") {
     "framework/Source/KeyCodeMap.g.mm",
     "framework/Source/overlay_view_controller_service.h",
     "framework/Source/overlay_view_controller_service.mm",
+    "framework/Source/overlay_platform_plugin_mac.h",
+    "framework/Source/overlay_platform_plugin_mac.mm",
     "framework/Source/platform_overlay_service_mac.h",
     "framework/Source/platform_overlay_service_mac.mm",
     "framework/Source/presenter_service_mac.h",

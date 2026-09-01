@@ -15,8 +15,12 @@
 
 @property(nonatomic, nullable, weak) ClayViewProvider* eventDelegate;
 
-// Updates painted regions used by hitTest:.
-- (void)updateOpaqueRects:(NSArray<NSValue*>* _Nonnull)rects;
+// Updates painted regions used by hitTest:, keyed by the owning Lynx view.
+- (void)updateOpaqueRects:(NSDictionary<NSNumber*, NSValue*>* _Nonnull)rects;
+
+- (void)setHitTestTransparent:(BOOL)transparent forViewId:(int64_t)viewId;
+- (void)removeOpaqueRectForViewId:(int64_t)viewId;
+- (void)removeHitTestStateForViewId:(int64_t)viewId;
 
 // Converts a Lynx top-left device-pixel rect into this view's point space.
 - (NSRect)viewRectFromDevicePixelRect:(NSRect)rect contentsScale:(CGFloat)scale;

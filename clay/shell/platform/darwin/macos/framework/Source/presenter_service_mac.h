@@ -8,6 +8,7 @@
 #import <QuartzCore/QuartzCore.h>
 
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include "clay/shell/common/services/compositor/presenter_service.h"
@@ -48,7 +49,7 @@ class PresenterServiceMac final : public PresenterService {
 
   clay::Puppet<clay::Owner::kPlatform, OverlayViewControllerService>
       overlay_view_controller_service_;
-  std::vector<CGRect> overlay_hit_rects_;
+  std::vector<std::pair<int64_t, CGRect>> overlay_hit_rects_;
 };
 
 }  // namespace clay
